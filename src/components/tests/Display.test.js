@@ -1,6 +1,58 @@
+import React from "react";
+import { render, screen, wait, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import Display from "../Display";
+import fetchShow from "../../api/fetchShow";
+jest.mock("../../api/fetchShow");
 
+const showTest = {
+    //add in approprate test data structure here.
+    name: "Stranger Things",
+    summary: "summary",
+    seasons: [
+      {
+        name: "Season 1",
+        id: 1,
+        episodes: [{ id: 1, number: 10 }],
+      },
+    ],
+  };
+  
+  test("Test that the Display component renders without any passed in props", () => {
+    render(<Display />);
+  });
 
-
+  test("Test that when the fetch button is pressed,the show component will display", async () => {
+    render(<Display />);
+    fetchShow.mockResolvedValueOnce(showTest);
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+    await waitFor(() => {
+    const showContainer = screen.queryByTestId("show-container");
+    expect(showContainer).toBeInTheDocument();
+  });
+});
+test("Test that when the fetch button is pressed, select options rendered is equal to the amount of seasons", async () => {
+    render (<Display />)
+    fetchShow.mockResolvedValueOnce(showTest);
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+    await waitFor(() =>{
+      const seasonOption = screen.getAllByTestId("season-option");
+      console.log("seasonOption:",seasonOption.length);
+      expect(seasonOption).toHaveLength(1);
+    });
+  });
+  test("Test that when the fetch button is pressed, displayFunc is called", async() => {
+    const fakeDisplayFunc = jest.fn();
+    render (<Display displayFunc={fakeDisplayFunc}/>)
+    fetchShow.mockResolvedValueOnce(showTest)
+    const button = screen.getByRole("button");
+    userEvent.click(button);
+    await waitFor(() =>{
+      expect(fakeDisplayFunc).toBeCalledTimes(1);
+    });
+  });
 
 
 

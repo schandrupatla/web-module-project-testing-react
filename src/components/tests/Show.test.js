@@ -6,21 +6,62 @@ import Show from './../Show';
 
 const testShow = {
     //add in approprate test data structure here.
-}
+    name: "",
+    summary: "",
+    seasons: [
+      {
+        name: "Season 1",
+        id: 1,
+        episodes: [{ id: 1, number: 10 }],
+      },
+      {
+        name: "Season 2",
+        id: 2,
+        episodes: [],
+      },
+    ],
+  };
+  //console.log(testShow);
+
 
 test('renders testShow and no selected Season without errors', ()=>{
+    render(<Show show={testShow} selectedSeason="none" />);
 });
 
 test('renders Loading component when prop show is null', () => {
+    render(<Show show={null} />);
+    const value = screen.queryByText(/Fetching data.../i);
+    expect(value).toBeInTheDocument();
 });
 
 test('renders same number of options seasons are passed in', ()=>{
+    render(<Show show={testShow} selectedSeason="none" />);
+    const seasonButton = screen.getByLabelText(/Select A Season/i);
+    expect(seasonButton).toBeInTheDocument();
+    userEvent.click(seasonButton);
+    const seasonOption = screen.getAllByTestId("season-option");
+    console.log("seasonOption:", seasonOption.length);
+    expect(seasonOption).toHaveLength(2);
 });
 
 test('handleSelect is called when an season is selected', () => {
+    const handleSelect = jest.fn();
+  render(
+    <Show show={testShow} handleSelect={handleSelect} selectedSeason="none" />
+  );
+  const seasonButton = screen.getByLabelText(/Select A Season/i);
+  userEvent.selectOptions(seasonButton, ["1"]);
+  expect(screen.getByRole("option", { name: "Season 1" }).selected).toBe(true);
+  expect(handleSelect).toBeCalledTimes(1);
 });
 
 test('component renders when no seasons are selected and when rerenders with a season passed in', () => {
+    const { rerender } = render(<Show show={testShow} selectedSeason="none" />);
+  let containter = screen.queryByTestId("episodes-container");
+  expect(containter).not.toBeInTheDocument();
+  rerender(<Show show={testShow} selectedSeason={1} />);
+  containter = screen.queryByTestId("episodes-container");
+  expect(containter).toBeInTheDocument();
 });
 
 //Tasks:
